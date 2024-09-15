@@ -21,6 +21,18 @@ async function runTests() {
     } catch (err) {
         console.log("DATABASE CONNECTION ERROR : ", err);
     }
+
+    console.log("Test 2 : TABLE CREATION");
+
+    
+    await db.createTable("users", {
+        name: "string",
+        age : "number"
+    });
+
+    console.log("PASS: TABLE created successfully");
+
+
 }
 
 runTests();
