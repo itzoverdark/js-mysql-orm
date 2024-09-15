@@ -73,6 +73,36 @@ class Database {
             console.error(`ERROR DROPPING TABLE ${tableName}`);
         }
     };
+
+    async insert(tableName, data) {
+        if (!this.connection) {
+            throw new Error("Database connection not established.");
+        }
+
+        // Ensure data is an array
+        if (!Array.isArray(data)) {
+            data = [data];
+        }
+
+        if (data.length === 0) {
+            throw new Error("Data array should not be empty.");
+        }
+
+        const columns = Object.keys(data[0]).join(", ");
+        const values = data.map(record => Object.values(record));
+        const placeholders = values[0].map(() => '?').join(", ");
+        const sql = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders})`;
+
+        try {
+            for (const record of data) {
+                await this.connection.query(sql, Object.values(record));
+                console.log(`Record inserted into ${tableName} successfully.`);
+            }
+        } catch (err) {
+            console.error(`ERROR INSERTING RECORD INTO ${tableName}:`, err);
+        }
+    };
+    
 }
 
 module.exports = Database;
