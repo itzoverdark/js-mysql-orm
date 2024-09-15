@@ -42,6 +42,26 @@ async function runTests() {
 +       console.log("FAIL: ERROR DROPPING TABLE users");
     }
 
+    console.log("Test 3 : INSERT INTO TABLE");
+
+    try {
+        // Insert a single record into the table
+        await db.insert('User', {
+            name: 'Ishaq',
+            age: 18,
+            active: 1
+        });
+    
+        // Insert multiple records into the table
+        await db.insert('User', [
+            { name: 'Alice', age: 25, active: 1 },
+            { name: 'Bob', age: 30, active: 0 }
+        ]);
+
+        console.log('PASS: INSERTED VALUES INTO TABLE SUCCESSFULLY');
+    } catch (err) {
+        console.log('FAIL: ERROR INSERTING VALUES INTO TABLE : ', err);
+    }
 }
 
 runTests();
