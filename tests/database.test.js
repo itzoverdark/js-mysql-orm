@@ -33,6 +33,15 @@ async function runTests() {
     console.log("PASS: TABLE created successfully");
 
 
+    console.log("Test 3 : TABLE DROPPING");
+
+    try {
+        await db.deleteTable("users");
++       console.log("PASS: TABLE DROPPED SUCCESSFULLY");
+    } catch (err) {
++       console.log("FAIL: ERROR DROPPING TABLE users");
+    }
+
 }
 
 runTests();
