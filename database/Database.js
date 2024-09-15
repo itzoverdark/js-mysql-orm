@@ -18,6 +18,43 @@ class Database {
         } catch (err) {
             return null;
         }
+    };
+
+    async createTable(tableName, tableArgs) {
+        if (!this.connection) {
+            throw new Error("Database connection not established.");
+        }
+
+        let columns = "";
+        const typeMapping = {
+            string: 'VARCHAR(255)',
+            number: 'INT',
+            boolean: 'TINYINT(1)',
+            date: 'DATETIME',
+        };
+
+        for (let [key, value] of Object.entries(tableArgs)) {
+            // get the equivalent type in mysql
+            const mysqlType = typeMapping[value];
+
+            if (!mysqlType) {
+                console.error(`Unsupported type: ${value}`);
+                continue;
+            }
+            columns += `${key} ${mysqlType}, `
+        }
+
+        // Remove the trailing comma and space
+        columns = columns.slice(0, -2);
+        
+        try {
+            const sql = `CREATE TABLE ${tableName} (${columns})`;
+            const [result] = await this.connection.query(sql);
+            console.log(`Table ${tableName} created successfully.`);
+            return result;
+        } catch (err) {
+            console.error(`ERROR CREATING TABLE ${tableName}:`, err);
+        }
     }
 }
 
