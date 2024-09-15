@@ -14,6 +14,7 @@ class Database {
             this.connection = await mysql.createConnection(
                 `mysql://${this.user}:${this.password}@${this.host}:${this.port}/${this.database}`
             );
+            console.log("Database connected successfully");
             return this.connection;
         } catch (err) {
             return null;
@@ -55,7 +56,23 @@ class Database {
         } catch (err) {
             console.error(`ERROR CREATING TABLE ${tableName}:`, err);
         }
-    }
+    };
+
+    async deleteTable(tableName) {
+        if(!this.connection) {
+            throw new Error("Database connection not established.");
+        }
+
+        try {
+            const sql = `DROP TABLE ${tableName}`;
+            const [result] = await this.connection.query(sql);
+            console.log(`Table ${tableName} Dropped successfully`);
+            return result;
+
+        } catch (err) {
+            console.error(`ERROR DROPPING TABLE ${tableName}`);
+        }
+    };
 }
 
 module.exports = Database;
