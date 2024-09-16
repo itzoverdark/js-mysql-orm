@@ -29,6 +29,7 @@ class Database {
         }
 
         let columns = "";
+        let primaryKey = null;
         const typeMapping = {
             string: 'VARCHAR(255)',
             number: 'INT',
@@ -37,19 +38,25 @@ class Database {
         };
 
         for (let [key, value] of Object.entries(tableArgs)) {
-            // get the equivalent type in mysql
-            const mysqlType = typeMapping[value];
+            let columnDef = `${key} `;
 
-            if (!mysqlType) {
-                console.error(`Unsupported type: ${value}`);
-                continue;
+            // Check if primary key is specified
+            if (value.primaryKey) {
+                columnDef += typeMapping[value.type] + " PRIMARY KEY";
+                if (value.autoIncrement && value.type === 'number') {
+                    columnDef += " AUTO_INCREMENT";
+                }
+                primaryKey = key;
+            } else {
+                columnDef += typeMapping[value.type];
             }
-            columns += `${key} ${mysqlType}, `
+
+            columns += `${columnDef}, `;
         }
 
         // Remove the trailing comma and space
         columns = columns.slice(0, -2);
-        
+
         try {
             const sql = `CREATE TABLE ${tableName} (${columns})`;
             const [result] = await this.connection.query(sql);
