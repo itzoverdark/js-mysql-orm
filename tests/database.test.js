@@ -24,27 +24,25 @@ async function runTests() {
 
     console.log("Test 2 : TABLE CREATION");
 
-    
     await db.createTable("users", {
         id: { type: "number", primaryKey: true, autoIncrement: true },
         name: { type: "string" },
         age: { type: "number" },
     });
-    
-    console.log("PASS: TABLE created successfully");
 
+    console.log("PASS: TABLE created successfully");
 
     console.log("Test 3 : INSERT INTO TABLE");
 
     try {
-        await db
-            .insert("users")
+        await db.table("users")
+            .insert()
             .records({ name: "Ishaq", age: 18 })
             .execute();
 
         // Inserting multiple records
-        await db
-            .insert("users")
+        await db.table("users")
+            .insert()
             .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
             .execute();
 
@@ -52,57 +50,55 @@ async function runTests() {
     } catch (err) {
         console.log('FAIL: ERROR INSERTING VALUES INTO TABLE : ', err);
     }
-    
-    
+
     console.log("Test 4: SELECT FROM TABLE");
 
     try {
         // Test 1: Select all columns from the "users" table
-        const allUsers = await db.select("users").execute();
+        const allUsers = await db.table("users").select().execute();
         if (Array.isArray(allUsers)) {
             console.log("PASS: SELECTED ALL COLUMNS FROM TABLE SUCCESSFULLY");
         } else {
             console.log("FAIL: ERROR SELECTING ALL COLUMNS FROM TABLE");
         }
-    
+
         // Test 2: Select specific columns "name" and "age" from the "users" table
-        const userData = await db
-            .select("users")
+        const userData = await db.table("users")
+            .select()
             .columns("name", "age")
             .where("age > 18")
             .execute();
-        
+
         if (Array.isArray(userData) && userData.length > 0) {
             console.log("PASS: SELECTED NAME AND AGE FROM USERS WHERE AGE > 18 SUCCESSFULLY");
         } else {
             console.log("FAIL: ERROR SELECTING SPECIFIC COLUMNS OR NO DATA FOUND");
         }
-    
+
         // Test 3: Select with multiple conditions
-        const filteredData = await db
-            .select("users")
+        const filteredData = await db.table("users")
+            .select()
             .columns("name", "age")
             .where("age > 18")
             .and("name = 'Ishaq'")
             .execute();
-    
+
         if (Array.isArray(filteredData) && filteredData.length > 0) {
             console.log("PASS: SELECTED USERS WITH AGE > 18 AND NAME = 'Ishaq' SUCCESSFULLY");
         } else {
             console.log("FAIL: ERROR SELECTING USERS WITH CONDITIONS OR NO DATA FOUND");
         }
-    
+
     } catch (err) {
         console.log("FAIL: ERROR SELECTING FROM TABLE", err);
     }
-
 
     console.log("Test 5: DELETE FROM TABLE");
 
     try {
         // Test: Delete users where age is greater than 18
-        const deleteResult = await db
-            .delete("users")
+        const deleteResult = await db.table("users")
+            .delete()
             .where("age > 18")
             .execute();
 
@@ -113,8 +109,8 @@ async function runTests() {
         }
 
         // Verify if users with age > 18 are really deleted
-        const remainingUsers = await db
-            .select("users")
+        const remainingUsers = await db.table("users")
+            .select()
             .columns("name", "age")
             .where("age > 18")
             .execute();
@@ -128,7 +124,7 @@ async function runTests() {
     } catch (err) {
         console.log("FAIL: ERROR DELETING FROM TABLE", err);
     }
-    
+
 
 }
 
