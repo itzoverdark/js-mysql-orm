@@ -1,6 +1,7 @@
 const mysql = require("mysql2/promise");
 const selectQueryBuilder = require("./utils/selectQueryBuilder");
 const InsertQueryBuilder = require("./utils/insertQueryBuilder");
+const DeleteQueryBuilder = require("./utils/deleteQueryBuilder");
 
 class Database {
     constructor(host, user, password, database, port) {
@@ -97,6 +98,14 @@ class Database {
 
         // Return an instance of QueryBuilder
         return new selectQueryBuilder(this, tableName);
+    }
+
+    delete(tableName) {
+        if (!this.connection) {
+            throw new Error("Database connection not established.");
+        }
+
+        return new DeleteQueryBuilder(this, tableName);
     }
 }
 
