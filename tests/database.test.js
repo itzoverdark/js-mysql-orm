@@ -96,6 +96,38 @@ async function runTests() {
         console.log("FAIL: ERROR SELECTING FROM TABLE", err);
     }
 
+
+    console.log("Test 5: DELETE FROM TABLE");
+
+    try {
+        // Test: Delete users where age is greater than 18
+        const deleteResult = await db
+            .delete("users")
+            .where("age > 18")
+            .execute();
+
+        if (deleteResult.affectedRows > 0) {
+            console.log(`PASS: DELETED ${deleteResult.affectedRows} USERS WHERE AGE > 18 SUCCESSFULLY`);
+        } else {
+            console.log("FAIL: NO USERS WERE DELETED WHERE AGE > 18");
+        }
+
+        // Verify if users with age > 18 are really deleted
+        const remainingUsers = await db
+            .select("users")
+            .columns("name", "age")
+            .where("age > 18")
+            .execute();
+
+        if (Array.isArray(remainingUsers) && remainingUsers.length === 0) {
+            console.log("PASS: NO USERS WITH AGE > 18 REMAINING");
+        } else {
+            console.log("FAIL: USERS WITH AGE > 18 STILL EXIST");
+        }
+
+    } catch (err) {
+        console.log("FAIL: ERROR DELETING FROM TABLE", err);
+    }
     
 
 }
