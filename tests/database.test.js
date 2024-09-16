@@ -26,10 +26,11 @@ async function runTests() {
 
     
     await db.createTable("users", {
-        name: "string",
-        age : "number"
+        id: { type: "number", primaryKey: true, autoIncrement: true },
+        name: { type: "string" },
+        age: { type: "number" },
     });
-
+    
     console.log("PASS: TABLE created successfully");
 
 
