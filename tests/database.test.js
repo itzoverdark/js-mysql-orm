@@ -125,6 +125,20 @@ async function runTests() {
         console.log("FAIL: ERROR DELETING FROM TABLE", err);
     }
 
+    console.log("Test 6 : DATABASE DISCONNECT");
+
+    try {
+        const connection = await db.disconnect();
+        if (connection == null) {
+            console.log('PASS: Database disconnected successfully');
+        } else {
+            console.log('FAIL: Database disconnect failed');
+        }
+    } catch (err) {
+        console.log("DATABASE DISCONNECT ERROR : ", err);
+    }
+
+
 
 }
 
