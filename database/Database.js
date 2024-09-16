@@ -22,6 +22,21 @@ class Database {
         }
     };
 
+    async disconnect() {
+        if (this.connection) {
+            try {
+                await this.connection.end();  // Close the connection
+                console.log("Database disconnected successfully");
+            } catch (err) {
+                console.error("Error disconnecting from the database:", err);
+            } finally {
+                this.connection = null;  // Set connection to null after disconnect
+            }
+        } else {
+            console.warn("No active database connection to disconnect.");
+        }
+    }
+
     async createTable(tableName, tableArgs) {
         if (!this.connection) {
             throw new Error("Database connection not established.");
