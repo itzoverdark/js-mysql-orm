@@ -36,17 +36,16 @@ async function runTests() {
     console.log("Test 3 : INSERT INTO TABLE");
 
     try {
-        // Insert a single record into the table
-        await db.insert('users', {
-            name: 'Ishaq',
-            age: 18
-        });
-    
-        // Insert multiple records into the table
-        await db.insert('users', [
-            { name: 'Alice', age: 25},
-            { name: 'Bob', age: 30}
-        ]);
+        await db
+            .insert("users")
+            .records({ name: "Ishaq", age: 18 })
+            .execute();
+
+        // Inserting multiple records
+        await db
+            .insert("users")
+            .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
+            .execute();
 
         console.log('PASS: INSERTED VALUES INTO TABLE SUCCESSFULLY');
     } catch (err) {
