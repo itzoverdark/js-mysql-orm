@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "mysql2": "^3.11.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
