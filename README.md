@@ -116,7 +116,3 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 ## License
 
 This project is licensed under the MIT License.
-### How to Customize
-
-- Replace the placeholder link `https://github.com/itzoverdark/your-repo-name.git` with the actual link to your GitHub repository.
-- Feel free to add any additional sections, such as tests, advanced features, or roadmap, if necessary.
