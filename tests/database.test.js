@@ -1,156 +1,126 @@
 const Database = require("../database/Database.js");
 
-async function runTests() {
-    const db = new Database(
-        "127.0.0.1", //host
-        "root", //user
-        "ishaq", //password
-        "customorm", //database
-        3306, //port
-    );
+let db;
+let connection;
 
-    console.log("Test 1 : DATABASE CONNECTION");
+describe("Database Tests", () => {
 
-    try {
-        const connection = await db.connect();
-        if (connection) {
-            console.log('PASS: Database connected successfully');
-        } else {
-            console.log('FAIL: Database connection failed');
-        }
-    } catch (err) {
-        console.log("DATABASE CONNECTION ERROR : ", err);
-    }
-
-    console.log("Test 2 : TABLE CREATION");
-
-    await db.createTable("users", {
-        id: { type: "number", primaryKey: true, autoIncrement: true },
-        name: { type: "string" },
-        age: { type: "number" },
+    // Initialize the database connection before all tests
+    beforeAll(async () => {
+        db = new Database(
+            "127.0.0.1", // host
+            "root", // user
+            "ishaq", // password
+            "customorm", // database
+            3306, // port
+        );
+        await db.connect();
+        connection = db.connection;
     });
 
-    console.log("PASS: TABLE created successfully");
+    // Close the database connection after all tests
+    afterAll(async () => {
+        await db.disconnect();
+    });
 
-    console.log("Test 3 : INSERT INTO TABLE");
+    test("1. Database should connect successfully", async () => {
+        expect(connection).toBeTruthy();
+    });
 
-    try {
+    test("2. Should create 'users' table", async () => {
+        // First, ensure any existing 'users' table is dropped
+        await connection.query("DROP TABLE IF EXISTS users");
+
+        // Create the table using your ORM
+        await db.createTable("users", {
+            id: { type: "number", primaryKey: true, autoIncrement: true },
+            name: { type: "string" },
+            age: { type: "number" },
+        });
+
+        // Check if the 'users' table exists using raw SQL
+        const [rows] = await connection.query(`
+            SELECT COUNT(*) AS tableExists
+            FROM information_schema.tables
+            WHERE table_schema = '${db.database}'
+            AND table_name = 'users';
+        `);
+
+        expect(rows[0].tableExists).toBe(1);
+    });
+
+    test("3. Should insert data into 'users' table", async () => {
+        // Clear the table first
+        await connection.query("DELETE FROM users");
+
+        // Insert data using your ORM
         await db.table("users")
             .insert()
             .records({ name: "Ishaq", age: 18 })
             .execute();
 
-        // Inserting multiple records
         await db.table("users")
             .insert()
             .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
             .execute();
 
-        console.log('PASS: INSERTED VALUES INTO TABLE SUCCESSFULLY');
-    } catch (err) {
-        console.log('FAIL: ERROR INSERTING VALUES INTO TABLE : ', err);
-    }
+        // Verify the data insertion with raw SQL
+        const [rows] = await connection.query("SELECT COUNT(*) AS count FROM users");
+        expect(rows[0].count).toBeGreaterThan(0);
+    });
 
-    console.log("Test 4: SELECT FROM TABLE");
+    test("4. Should select data from 'users' table", async () => {
+        // Clear the table first
+        await connection.query("DELETE FROM users");
 
-    try {
-        // Test 1: Select all columns from the "users" table
+        // Insert some data using your ORM
+        await db.table("users")
+            .insert()
+            .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
+            .execute();
+
+        // Verify the data selection with raw SQL
         const allUsers = await db.table("users").select().execute();
-        if (Array.isArray(allUsers)) {
-            console.log("PASS: SELECTED ALL COLUMNS FROM TABLE SUCCESSFULLY");
-        } else {
-            console.log("FAIL: ERROR SELECTING ALL COLUMNS FROM TABLE");
-        }
+        expect(allUsers.length).toBe(3);
 
-        // Test 2: Select specific columns "name" and "age" from the "users" table
-        const userData = await db.table("users")
-            .select()
-            .columns("name", "age")
-            .where("age > 18")
+        const filteredUsers = await db.table("users").select().columns("name", "age").where("age > ?", 18).execute();
+        expect(filteredUsers.length).toBeGreaterThan(0);
+    });
+
+    test("5. Should delete data from 'users' table", async () => {
+        // Clear the table first
+        await connection.query("DELETE FROM users");
+
+        // Insert data to delete
+        await db.table("users")
+            .insert()
+            .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
             .execute();
 
-        if (Array.isArray(userData) && userData.length > 0) {
-            console.log("PASS: SELECTED NAME AND AGE FROM USERS WHERE AGE > 18 SUCCESSFULLY");
-        } else {
-            console.log("FAIL: ERROR SELECTING SPECIFIC COLUMNS OR NO DATA FOUND");
-        }
+        // Delete records using your ORM
+        const deleteResult = await db.table("users").delete().where("age > 18").execute();
+        expect(deleteResult.affectedRows).toBeGreaterThan(0);
+    });
 
-        // Test 3: Select with multiple conditions
-        const filteredData = await db.table("users")
-            .select()
-            .columns("name", "age")
-            .where("age > 18")
-            .and("name = 'Ishaq'")
+    test("6. Should update data in 'users' table", async () => {
+        // Clear the table first
+        await connection.query("DELETE FROM users");
+
+        // Insert data to update
+        await db.table("users")
+            .insert()
+            .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 18 }])
             .execute();
 
-        if (Array.isArray(filteredData) && filteredData.length > 0) {
-            console.log("PASS: SELECTED USERS WITH AGE > 18 AND NAME = 'Ishaq' SUCCESSFULLY");
-        } else {
-            console.log("FAIL: ERROR SELECTING USERS WITH CONDITIONS OR NO DATA FOUND");
-        }
-
-    } catch (err) {
-        console.log("FAIL: ERROR SELECTING FROM TABLE", err);
-    }
-
-    console.log("Test 5: DELETE FROM TABLE");
-
-    try {
-        // Test: Delete users where age is greater than 18
-        const deleteResult = await db.table("users")
-            .delete()
-            .where("age > 18")
+        // Update records using ORM
+        await db.table("users")
+            .update()
+            .set({ age: 99 })
+            .where("age = 18")
             .execute();
 
-        if (deleteResult.affectedRows > 0) {
-            console.log(`PASS: DELETED ${deleteResult.affectedRows} USERS WHERE AGE > 18 SUCCESSFULLY`);
-        } else {
-            console.log("FAIL: NO USERS WERE DELETED WHERE AGE > 18");
-        }
-
-        // Verify if users with age > 18 are really deleted
-        const remainingUsers = await db.table("users")
-            .select()
-            .columns("name", "age")
-            .where("age > 18")
-            .execute();
-
-        if (Array.isArray(remainingUsers) && remainingUsers.length === 0) {
-            console.log("PASS: NO USERS WITH AGE > 18 REMAINING");
-        } else {
-            console.log("FAIL: USERS WITH AGE > 18 STILL EXIST");
-        }
-
-    } catch (err) {
-        console.log("FAIL: ERROR DELETING FROM TABLE", err);
-    }
-
-    console.log("Test 6 : DATABASE DISCONNECT");
-
-    try {
-        const connection = await db.disconnect();
-        if (connection == null) {
-            console.log('PASS: Database disconnected successfully');
-        } else {
-            console.log('FAIL: Database disconnect failed');
-        }
-    } catch (err) {
-        console.log("DATABASE DISCONNECT ERROR : ", err);
-    }
-
-    console.log("Test 7 : UPDATE QUERY");
-
-    try {
-        await db.table('users')
-        .update()
-        .set({ name: 'ddddddddddd' })
-        .where('age = 99')
-        .execute();
-        console.log('PASS: UPDATE QUERY successful');
-    } catch (err) {
-        console.log("FAIL: UPDATE QUERY ERROR : ", err);
-    }
-
-}
-
-runTests();
+        // Verify the data update with raw SQL
+        const [updatedUser] = await connection.query("SELECT * FROM users WHERE age = 99");
+        expect(updatedUser.length).toBe(1);
+    });
+});
