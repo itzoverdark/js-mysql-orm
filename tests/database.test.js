@@ -138,7 +138,18 @@ async function runTests() {
         console.log("DATABASE DISCONNECT ERROR : ", err);
     }
 
+    console.log("Test 7 : UPDATE QUERY");
 
+    try {
+        await db.table('users')
+        .update()
+        .set({ name: 'ddddddddddd' })
+        .where('age = 99')
+        .execute();
+        console.log('PASS: UPDATE QUERY successful');
+    } catch (err) {
+        console.log("FAIL: UPDATE QUERY ERROR : ", err);
+    }
 
 }
 
