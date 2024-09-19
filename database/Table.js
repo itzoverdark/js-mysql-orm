@@ -1,7 +1,7 @@
-const selectQueryBuilder = require("./utils/selectQueryBuilder");
-const InsertQueryBuilder = require("./utils/insertQueryBuilder");
-const DeleteQueryBuilder = require("./utils/deleteQueryBuilder");
-const UpdateQueryBuilder = require("./utils/updateQueryBuilder");
+const selectQueryBuilder = require("./utils/dataOperations/selectQueryBuilder");
+const InsertQueryBuilder = require("./utils/dataOperations/insertQueryBuilder");
+const DeleteQueryBuilder = require("./utils/dataOperations/deleteQueryBuilder");
+const UpdateQueryBuilder = require("./utils/dataOperations/updateQueryBuilder");
 
 class Table {
     constructor(db, tableName) {
