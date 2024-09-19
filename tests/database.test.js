@@ -123,4 +123,56 @@ describe("Database Tests", () => {
         const [updatedUser] = await connection.query("SELECT * FROM users WHERE age = 99");
         expect(updatedUser.length).toBe(1);
     });
+    
+    test("7. Should add a column to 'users' table", async () => {
+        // Add a new column 'email' to 'users' table using the ORM
+        await db.table("users").add_column("email", "string");
+    
+        // Verify if the new column was added by checking the table schema
+        const [rows] = await connection.query(`
+            SELECT COLUMN_NAME
+            FROM information_schema.columns
+            WHERE table_schema = '${db.database}'
+            AND table_name = 'users'
+            AND column_name = 'email';
+        `);
+    
+        expect(rows.length).toBe(1);
+    });
+    
+    test("8. Should drop a column from 'users' table", async () => {
+        // Add a column first so it can be dropped
+        await db.table("users").add_column("phone", "string");
+    
+        // Drop the 'phone' column using the ORM
+        await db.table("users").drop_column("phone");
+    
+        // Verify if the column was dropped by checking the table schema
+        const [rows] = await connection.query(`
+            SELECT COLUMN_NAME
+            FROM information_schema.columns
+            WHERE table_schema = '${db.database}'
+            AND table_name = 'users'
+            AND column_name = 'phone';
+        `);
+    
+        expect(rows.length).toBe(0);
+    });
+    
+    test("9. Should modify a column in 'users' table", async () => {
+        // Modify the 'name' column to be of type 'VARCHAR(100)' (string)
+        await db.table("users").modify_column("name", "string");
+    
+        // Verify the column was modified
+        const [rows] = await connection.query(`
+            SELECT COLUMN_TYPE
+            FROM information_schema.columns
+            WHERE table_schema = '${db.database}'
+            AND table_name = 'users'
+            AND column_name = 'name';
+        `);
+    
+        expect(rows[0].COLUMN_TYPE).toBe("varchar(255)"); // Based on your typeMapping definition
+    });
+    
 });
