@@ -1,5 +1,7 @@
 const mysql = require("mysql2/promise");
 const Table = require("./Table.js");
+const CreateTableBuilder = require("./utils/schemaOperations/createTableBuilder.js");
+const DeleteTableBuilder = require("./utils/schemaOperations/deleteTableBuilder.js");
 
 class Database {
     constructor(host, user, password, database, port) {
@@ -42,43 +44,8 @@ class Database {
             throw new Error("Database connection not established.");
         }
 
-        let columns = "";
-        let primaryKey = null;
-        const typeMapping = {
-            string: 'VARCHAR(255)',
-            number: 'INT',
-            boolean: 'TINYINT(1)',
-            date: 'DATETIME',
-        };
-
-        for (let [key, value] of Object.entries(tableArgs)) {
-            let columnDef = `${key} `;
-
-            // Check if primary key is specified
-            if (value.primaryKey) {
-                columnDef += typeMapping[value.type] + " PRIMARY KEY";
-                if (value.autoIncrement && value.type === 'number') {
-                    columnDef += " AUTO_INCREMENT";
-                }
-                primaryKey = key;
-            } else {
-                columnDef += typeMapping[value.type];
-            }
-
-            columns += `${columnDef}, `;
-        }
-
-        // Remove the trailing comma and space
-        columns = columns.slice(0, -2);
-
-        try {
-            const sql = `CREATE TABLE ${tableName} (${columns})`;
-            const [result] = await this.connection.query(sql);
-            console.log(`Table ${tableName} created successfully.`);
-            return result;
-        } catch (err) {
-            console.error(`ERROR CREATING TABLE ${tableName}:`, err);
-        }
+        const createTableBuilder = new CreateTableBuilder(this.connection, tableName, tableArgs);
+        createTableBuilder.create();
     };
 
     async deleteTable(tableName) {
@@ -86,15 +53,8 @@ class Database {
             throw new Error("Database connection not established.");
         }
 
-        try {
-            const sql = `DROP TABLE ${tableName}`;
-            const [result] = await this.connection.query(sql);
-            console.log(`Table ${tableName} Dropped successfully`);
-            return result;
-
-        } catch (err) {
-            console.error(`ERROR DROPPING TABLE ${tableName}`);
-        }
+        const deleteTableBuilder = new DeleteTableBuilder(this.connection, tableName);
+        deleteTableBuilder.delete();
     };
 
     table(tableName) {
