@@ -2,6 +2,7 @@ const selectQueryBuilder = require("./utils/dataOperations/selectQueryBuilder");
 const InsertQueryBuilder = require("./utils/dataOperations/insertQueryBuilder");
 const DeleteQueryBuilder = require("./utils/dataOperations/deleteQueryBuilder");
 const UpdateQueryBuilder = require("./utils/dataOperations/updateQueryBuilder");
+const AlterTableBuilder = require("./utils/schemaOperations/alterTableBuilder");
 
 class Table {
     constructor(db, tableName) {
@@ -14,6 +15,8 @@ class Table {
             throw new Error("Database connection not established.");
         }
     }
+
+    //operations on data inside tables
 
     insert() {
         this.ensureConnection();
@@ -34,6 +37,27 @@ class Table {
         this.ensureConnection();
         return new UpdateQueryBuilder(this.db, this.tableName);
     }
+
+    // operations on the table
+
+    async add_column(columnName, dataType) {
+        this.ensureConnection();
+        const alterTableBuilder = new AlterTableBuilder(this.db, this.tableName);  // Pass db and tableName
+        await alterTableBuilder.add_column(columnName, dataType);
+    }
+
+    async drop_column(columnName) {
+        this.ensureConnection();
+        const alterTableBuilder = new AlterTableBuilder(this.db, this.tableName);
+        await alterTableBuilder.drop_column(columnName);
+    }
+
+    async modify_column(columnName, dataType) {
+        this.ensureConnection();
+        const alterTableBuilder = new AlterTableBuilder(this.db, this.tableName);
+        await alterTableBuilder.modify_column(columnName, dataType);
+    }
+
 }
 
 module.exports = Table;
