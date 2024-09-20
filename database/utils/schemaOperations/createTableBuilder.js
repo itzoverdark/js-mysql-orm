@@ -8,6 +8,7 @@ class CreateTableBuilder {
     async create() {
         let columns = "";
         let primaryKey = null;
+        let foreignKeys = []; // To store foreign key constraints
         const typeMapping = {
             string: 'VARCHAR(255)',
             number: 'INT',
@@ -30,10 +31,21 @@ class CreateTableBuilder {
             }
     
             columns += `${columnDef}, `;
+
+            // Check if the column has a foreign key constraint
+            if (value.foreignKey) {
+                const { references, referencedColumn } = value.foreignKey;
+                foreignKeys.push(`FOREIGN KEY (${key}) REFERENCES ${references}(${referencedColumn})`);
+            }
         }
     
-        // Remove the trailing comma and space
+        // Remove the trailing comma and space from the column definition
         columns = columns.slice(0, -2);
+    
+        // Append foreign key constraints, if any
+        if (foreignKeys.length > 0) {
+            columns += `, ${foreignKeys.join(', ')}`;
+        }
     
         try {
             const sql = `CREATE TABLE ${this.tableName} (${columns})`;
@@ -41,7 +53,12 @@ class CreateTableBuilder {
             console.log(`Table ${this.tableName} created successfully.`);
             return result;
         } catch (err) {
-            console.error(`ERROR CREATING TABLE ${this.tableName}:`, err);
+            if (err.code === 'ER_NO_REFERENCED_TABLE' || err.code === 'ER_NO_REFERENCED_TABLE2') {
+                console.error('Referenced table or column does not exist.');
+            } else {
+                console.error(`ERROR CREATING TABLE ${this.tableName}:`, err);
+            }
+            throw err;
         }
     }
 
