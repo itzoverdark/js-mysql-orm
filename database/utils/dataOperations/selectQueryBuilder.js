@@ -6,6 +6,7 @@ class QueryBuilder {
         this.whereClause = "";
         this.additionalConditions = [];
         this.parameters = [];
+        this.orderby = "";
     }
 
     columns(...columns) {
@@ -45,8 +46,13 @@ class QueryBuilder {
         return this; // Return `this` to allow chaining
     }
 
+    orderBy(condition) {
+        this.orderby = `ORDER BY ${condition}`;
+        return this;
+    }
+
     async execute() {
-        const fullQuery = `SELECT ${this.columnsList} FROM ${this.tableName}${this.whereClause} ${this.additionalConditions.join(" ")}`;
+        const fullQuery = `SELECT ${this.columnsList} FROM ${this.tableName}${this.whereClause} ${this.additionalConditions.join(" ")} ${this.orderby}`;
         try {
             const [rows] = await this.db.connection.query(fullQuery, this.parameters);
             console.log(rows);
