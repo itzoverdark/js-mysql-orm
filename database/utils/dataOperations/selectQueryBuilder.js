@@ -7,6 +7,8 @@ class QueryBuilder {
         this.additionalConditions = [];
         this.parameters = [];
         this.orderby = "";
+        this.limitParam = "";
+        this.groupByParam = "";
     }
 
     columns(...columns) {
@@ -51,8 +53,22 @@ class QueryBuilder {
         return this;
     }
 
+    limit(number) {
+        if (number) {
+            this.limitParam = `LIMIT ${number}`;
+            return this;
+        }
+    }
+
+    groupBy(columnName) {
+        if (columnName) {
+            this.groupByParam = `GROUP BY ${columnName}`;
+            return this;
+        }
+    }
+
     async execute() {
-        const fullQuery = `SELECT ${this.columnsList} FROM ${this.tableName}${this.whereClause} ${this.additionalConditions.join(" ")} ${this.orderby}`;
+        const fullQuery = `SELECT ${this.columnsList} FROM ${this.tableName} ${this.whereClause} ${this.additionalConditions.join(" ")} ${this.groupByParam} ${this.orderby} ${this.limitParam}`;
         try {
             const [rows] = await this.db.connection.query(fullQuery, this.parameters);
             console.log(rows);
