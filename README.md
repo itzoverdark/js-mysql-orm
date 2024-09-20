@@ -1,5 +1,8 @@
 # Custom JavaScript ORM for MySQL
 
+[![npm version](https://img.shields.io/npm/v/js-mysql-orm)](https://www.npmjs.com/package/js-mysql-orm)
+
+
 This is a lightweight custom Object-Relational Mapping (ORM) library written in JavaScript, designed to simplify interactions with MySQL databases. It allows you to create tables, insert, update, delete, and query records using a simple and chainable API.
 
 ## Features
