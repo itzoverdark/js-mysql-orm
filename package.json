@@ -7,5 +7,25 @@
   },
   "scripts": {
     "test": "jest"
-  }
+  },
+  "name": "js-mysql-orm",
+  "description": "This is a lightweight custom Object-Relational Mapping (ORM) library written in JavaScript, designed to simplify interactions with MySQL databases. It allows you to create tables, insert, update, delete, and query records using a simple and chainable API.",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itzoverdark/js-mysql-orm.git"
+  },
+  "keywords": [
+    "javascript", "mysql", "orm"
+  ],
+  "author": "ishaq <i.ifkirne@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/itzoverdark/js-mysql-orm/issues"
+  },
+  "homepage": "https://github.com/itzoverdark/js-mysql-orm#readme"
 }
