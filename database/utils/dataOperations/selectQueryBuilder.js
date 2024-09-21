@@ -9,11 +9,27 @@ class QueryBuilder {
         this.orderby = "";
         this.limitParam = "";
         this.groupByParam = "";
+        this.aggregateFunctions = []; // To store aggregate functions like MAX, MIN, AVG
     }
 
     columns(...columns) {
         this.columnsList = columns.length > 0 ? columns.join(", ") : "*";
         return this; // Return `this` to allow chaining
+    }
+
+    max(column) {
+        this.aggregateFunctions.push(`MAX(${column}) AS max_${column}`);
+        return this;
+    }
+
+    min(column) {
+        this.aggregateFunctions.push(`MIN(${column}) AS min_${column}`);
+        return this;
+    }
+
+    avg(column) {
+        this.aggregateFunctions.push(`AVG(${column}) AS avg_${column}`);
+        return this;
     }
 
     where(condition, parameter) {
@@ -68,7 +84,15 @@ class QueryBuilder {
     }
 
     async execute() {
-        const fullQuery = `SELECT ${this.columnsList} FROM ${this.tableName} ${this.whereClause} ${this.additionalConditions.join(" ")} ${this.groupByParam} ${this.orderby} ${this.limitParam}`;
+        let columns = this.columnsList;
+        
+        // If aggregate functions exist, use them instead of the regular columns
+        if (this.aggregateFunctions.length > 0) {
+            columns = this.aggregateFunctions.join(", ");
+        }
+
+        const fullQuery = `SELECT ${columns} FROM ${this.tableName} ${this.whereClause} ${this.additionalConditions.join(" ")} ${this.groupByParam} ${this.orderby} ${this.limitParam}`;
+        
         try {
             const [rows] = await this.db.connection.query(fullQuery, this.parameters);
             console.log(rows);
