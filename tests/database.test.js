@@ -35,7 +35,7 @@ describe("Database Tests", () => {
         await db.createTable("users", {
             id: { type: "number", primaryKey: true, autoIncrement: true },
             userId: { type: 'number', foreignKey: { references: 'users', referencedColumn: 'id' } },
-            name: { type: "string" },
+            name: { type: "string", notNull: true },
             age: { type: "number" },
         });
 
