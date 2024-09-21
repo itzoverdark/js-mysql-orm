@@ -70,23 +70,37 @@ describe("Database Tests", () => {
         expect(rows[0].count).toBeGreaterThan(0);
     });
 
-    test("4. Should select data from 'users' table", async () => {
+    test("4. Should select data from 'users' table and test MAX, MIN, and AVG", async () => {
         // Clear the table first
         await connection.query("DELETE FROM users");
-
+    
         // Insert some data using your ORM
         await db.table("users")
             .insert()
             .records([{ name: "Alice", age: 25 }, { name: "Bob", age: 30 }, { name: "Ishaq", age: 21 }])
             .execute();
-
+    
         // Verify the data selection with raw SQL
         const allUsers = await db.table("users").select().execute();
         expect(allUsers.length).toBe(3);
-
+    
         const filteredUsers = await db.table("users").select().columns("name", "age").where("age > ?", 18).execute();
         expect(filteredUsers.length).toBeGreaterThan(0);
+    
+        // Test MAX for age
+        const maxAgeResult = await db.table("users").select().max("age").execute();
+        expect(maxAgeResult[0].max_age).toBe(30);  // Bob has the maximum age
+    
+        // Test MIN for age
+        const minAgeResult = await db.table("users").select().min("age").execute();
+        expect(minAgeResult[0].min_age).toBe(21);  // Ishaq has the minimum age
+    
+        // Test AVG for age
+        const avgAgeResult = await db.table("users").select().avg("age").execute();
+        const expectedAvg = (25 + 30 + 21) / 3;  // Manually calculate the average
+        expect(avgAgeResult[0].avg_age).toBeCloseTo(expectedAvg);
     });
+    
 
     test("5. Should delete data from 'users' table", async () => {
         // Clear the table first
