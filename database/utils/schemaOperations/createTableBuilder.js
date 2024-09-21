@@ -32,6 +32,13 @@ class CreateTableBuilder {
     
             columns += `${columnDef}, `;
 
+            // Add NOT NULL constraint if specified
+            if (value.notNull) {
+                columnDef += " NOT NULL";
+            }
+
+            columns += `${columnDef}, `;
+
             // Check if the column has a foreign key constraint
             if (value.foreignKey) {
                 const { references, referencedColumn } = value.foreignKey;
