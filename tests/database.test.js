@@ -98,7 +98,7 @@ describe("Database Tests", () => {
         // Test AVG for age
         const avgAgeResult = await db.table("users").select().avg("age").execute();
         const expectedAvg = (25 + 30 + 21) / 3;  // Manually calculate the average
-        expect(avgAgeResult[0].avg_age).toBeCloseTo(expectedAvg);
+        expect(Number(avgAgeResult[0].avg_age)).toBeCloseTo(expectedAvg);
     });
     
 
