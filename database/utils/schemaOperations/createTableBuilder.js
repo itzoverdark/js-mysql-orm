@@ -1,10 +1,42 @@
 class CreateTableBuilder {
+    /**
+     * CreateTableBuilder is used to create a new table in the database.
+     * @param {object} connection - The active MySQL connection object.
+     * @param {string} tableName - The name of the table to create.
+     * @param {object} tableArgs - An object describing the table columns and their properties.
+     * Example format: 
+     * {
+     *   columnName: { type: 'string', primaryKey: true, autoIncrement: true, notNull: true, foreignKey: { references: 'anotherTable', referencedColumn: 'id' } }
+     * }
+     */
     constructor(connection, tableName, tableArgs) {
         this.tableName = tableName;
         this.tableArgs = tableArgs;
         this.connection = connection; 
     }
 
+    /**
+     * Creates the table in the database using the provided arguments.
+     * 
+     * - Column types are mapped to SQL types: `string` -> `VARCHAR(255)`, `number` -> `INT`, `boolean` -> `TINYINT(1)`, `date` -> `DATETIME`.
+     * - Primary key and foreign key constraints can be specified in `tableArgs`.
+     * - The `notNull` property ensures that the column is defined as `NOT NULL`.
+     * 
+     * @returns {Promise<object>} - The result of the SQL query after table creation.
+     * @throws {Error} If the table creation fails.
+     * 
+     * @example
+     * const tableArgs = {
+     *   id: { type: 'number', primaryKey: true, autoIncrement: true },
+     *   name: { type: 'string', notNull: true },
+     *   age: { type: 'number' },
+     *   isActive: { type: 'boolean' },
+     *   friendId: { type: 'number', foreignKey: { references: 'friends', referencedColumn: 'id' } }
+     * };
+     * 
+     * const tableBuilder = new CreateTableBuilder(connection, "users", tableArgs);
+     * await tableBuilder.create();
+     */
     async create() {
         let columns = "";
         let primaryKey = null;
@@ -30,8 +62,6 @@ class CreateTableBuilder {
                 columnDef += typeMapping[value.type];
             }
     
-            columns += `${columnDef}, `;
-
             // Add NOT NULL constraint if specified
             if (value.notNull) {
                 columnDef += " NOT NULL";
@@ -68,7 +98,6 @@ class CreateTableBuilder {
             throw err;
         }
     }
-
 }
 
 module.exports = CreateTableBuilder;
